@@ -60,7 +60,7 @@ int main(int argc,char *argv[]) {
 	titles();
 
 	for (i=0; i<NVALS; ++i) {
-		for (set=0; (dst[set])!=""; ++set) {
+		for (set=0; dst[set][0] != 0; set++) {
 			//runSort(set,0,i); cr();
 			//runSort(set,1,i); cr();
 			runSort(set,2,i); cr();

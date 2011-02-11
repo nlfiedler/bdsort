@@ -4,7 +4,7 @@
 # license that can be found in the LICENSE file.
 #
 
-CFLAGS=-std=c99
+CFLAGS=-std=c99 -Wall -Wextra
 
 objects = bds.o bfile.o bms.o hsort.o main.o say.o
 
