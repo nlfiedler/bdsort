@@ -244,4 +244,3 @@ void resetTimers(int nt, int nreps);
 void sortTimer(int ph);
 double medMS(int ph);
 int setMaxFiles(long nfiles);
-//void sayLimits(void);
