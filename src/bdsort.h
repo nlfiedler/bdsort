@@ -138,7 +138,7 @@ typedef void (*hsort)(string *p0, int n, int d);
  * Global variables!
  */
 int ORDERIN, WRITEFILE, NREPS;
-char INDIR[100], OUTDIR[100], IFP[100], TFP[100], OFP[100], DATANAM[20], SORTNAM[20];
+string IFP, TFP, OFP; // input, temporary, output file paths
 timer TMR;
 double GNUMBS;
 series *SER, SER0;

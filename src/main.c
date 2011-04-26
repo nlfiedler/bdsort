@@ -5,16 +5,19 @@
 //
 
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/resource.h>
 #include <sys/errno.h>
+#include <sys/stat.h>
 #include "bdsort.h"
 
-string dst[] = {
-	"rec",
+// names of expected input files
+static string dst[] = {
+	"set1_dictcalls",
 	"", // XXX: should this sentinel be removed at some point?
 	"ran7",
 	"gen15",
@@ -25,11 +28,16 @@ string dst[] = {
 	"art5",
 	""
 };
-string ift[] = {
+static string ift[] = {
 	"dat",
 	"srt",
 	"rev"
 };
+
+static string INDIR;   // input directory
+static string OUTDIR;  // output directory
+static string DATANAM; // data set name
+static char SORTNAM[5]; // sort algorithm name
 
 int
 main(int argc, char *argv[]) {
@@ -66,8 +74,10 @@ main(int argc, char *argv[]) {
 			tok[ntoks++] = t;
 		}
 		if (strcmp(tok[0], "id") == 0) {
+			INDIR = calloc(strlen(tok[1]) + 1, sizeof(char));
 			strcpy(INDIR, tok[1]);
 		} else if (strcmp(tok[0], "od") == 0) {
+			OUTDIR = calloc(strlen(tok[1]) + 1, sizeof(char));
 			strcpy(OUTDIR, tok[1]);
 		} else {
 			if ((va[nvar] = loadArg(tok, ntoks, al, alp)) == NULL) {
@@ -77,8 +87,23 @@ main(int argc, char *argv[]) {
 		}
 	}
 
-	strcpy(INDIR, "LACIE/input/");
-	strcpy(OUTDIR, "LACIE/output/");
+	// validate user input
+	if (INDIR == NULL) {
+		printf("missing required id (input directory) option\n");
+		return -1;
+	}
+	if (OUTDIR == NULL) {
+		OUTDIR = calloc(strlen(INDIR) + 5, sizeof(char));
+		strcpy(OUTDIR, INDIR);
+		strcat(OUTDIR, ".out");
+	}
+
+	// create output directory
+	int rv = mkdir(OUTDIR, S_IRWXU);
+	if (rv == -1 && errno != EEXIST) {
+		printf("failed to make %s: %d\n", OUTDIR, errno);
+		return -1;
+	}
 
 	int lv = 0;
 	for (int sz = PAD; sz < IOSIZE; sz <<= 1) {
@@ -107,11 +132,14 @@ main(int argc, char *argv[]) {
 	cr();
 	isaye(FLIM, "FLIM");
 	cr();
+
+	free(INDIR);
+	free(OUTDIR);
 	return 0;
 }
 
 /*
- * runSort runs the desired sorting algorithm 
+ * runSort runs the desired sorting algorithm
  */
 void
 runSort(int dsn, int snum, int fsz) {
@@ -126,21 +154,28 @@ runSort(int dsn, int snum, int fsz) {
 	}
 	}
 
+	int dsnLen = strlen(dst[dsn]);
+	int dataNamLen = dsnLen + 1 + strlen(ift[ORDERIN]);
+	DATANAM = calloc(dataNamLen + 1, sizeof(char));
 	strcpy(DATANAM, dst[dsn]);
 	strcat(DATANAM, ".");
 	strcat(DATANAM, ift[ORDERIN]);
 
-	strcpy(IFP, "/volumes/");
-	strcat(IFP, INDIR);
+	int ifpLen = strlen(INDIR) + dataNamLen;
+	IFP = (string) calloc(ifpLen + 2, sizeof(char));
+	strcpy(IFP, INDIR);
+	strcat(IFP, "/");
 	strcat(IFP, DATANAM);
 
-	strcpy(TFP, "/volumes/");
-	strcat(TFP, OUTDIR);
+	TFP = (string) calloc(strlen(OUTDIR) + dsnLen + 6, sizeof(char));
+	strcpy(TFP, OUTDIR);
+	strcat(TFP, "/");
 	strcat(TFP, dst[dsn]);
 	strcat(TFP, ".tmg");
 
-	strcpy(OFP, "/volumes/");
-	strcat(OFP, OUTDIR);
+	OFP = (string) calloc(strlen(OUTDIR) + dsnLen + 10, sizeof(char));
+	strcpy(OFP, OUTDIR);
+	strcat(OFP, "/");
 	strcat(OFP, dst[dsn]);
 	strcat(OFP, SORTNAM);
 	strcat(OFP, ".std");
@@ -155,6 +190,11 @@ runSort(int dsn, int snum, int fsz) {
 	}
 	}
 	outlist();
+
+	free(OFP);
+	free(TFP);
+	free(IFP);
+	free(DATANAM);
 }
 
 void
