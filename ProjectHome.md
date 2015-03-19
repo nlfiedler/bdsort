@@ -1,0 +1,1 @@
+Burst-Distribution Sort is a cache friendly external sorting algorithm, initially developed by David B. Ring, that is a variant of burstsort that limits the number of nodes in the trie structure in order to stay within memory limits, thus ensuring scalable performance for very large data collections.
