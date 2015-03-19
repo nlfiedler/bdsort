@@ -4,7 +4,5 @@ Burst-Distribution Sort
 bdsort is a C program containing an implementation of the burst
 distribution sort algorithm by David B. Ring.
 
-For more details, see http://code.google.com/p/bdsort/
-
-Unless otherwise noted, the Sortingo source files are distributed under
+Unless otherwise noted, the bdsort source files are distributed under
 the BSD-style license found in the LICENSE file.
